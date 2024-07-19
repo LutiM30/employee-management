@@ -1,0 +1,45 @@
+{
+  "name": "classactivity",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "#start": "UI server. HMR is enabled in dev mode.",
+    "start": "nodemon -w server -w .env server/main.js",
+    "#compile": "UI server. HMR is disabled in production mode.",
+    "compile": "webpack --mode production",
+    "#watch": "Compile, and recompile on any changes.",
+    "watch": "webpack --watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "babel-polyfill": "^6.26.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "http-proxy-middleware": "^3.0.0",
+    "nodemon": "^3.1.0",
+    "prop-types": "^15.8.1",
+    "react": "^16.14.0",
+    "react-bootstrap": "^2.10.4",
+    "react-dom": "^16.14.0",
+    "react-router-dom": "^4.3.1",
+    "whatwg-fetch": "^3.6.20"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.3.0",
+    "eslint": "^5.12.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.2",
+    "eslint-plugin-react": "^7.12.3",
+    "webpack": "^4.28.3",
+    "webpack-cli": "^3.2.1",
+    "webpack-dev-middleware": "^3.7.1",
+    "webpack-hot-middleware": "^2.26.1"
+  }
+}
