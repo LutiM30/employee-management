@@ -1,95 +1,122 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import EmployeeTypesDropdown from './EmployeeTypesDropdown.jsx';
-import { DEBOUNCE } from '../utils/functions.js';
-import { AutoComplete } from 'antd';
+import { AutoComplete, Radio, Space } from 'antd';
 
-export default class EmployeeSearch extends React.Component {
-  constructor(props) {
-    super(props);
-    this.handleSearchChange = DEBOUNCE(this.props.setSearchQuery, 300);
+const EmployeeSearch = (props) => {
+  const { upcomingRetirement, setUpcomingRetirement } = props;
+  const [searchPlaceholder, setSearchPlaceholder] = useState(
+    'Type Something & Press Enter to Search...'
+  );
+  const [options, setOptions] = useState([]);
+  const autoCompleteRef = useRef(null);
 
-    this.state = {
-      searchPlaceHolder: 'Search ...',
-      timer: null,
-      options: [],
-    };
+  const handleSearchChange = props.setSearchQuery;
 
-    this.setRandomPlaceHolderTimer = (flag) => {
-      if (flag) {
-        this.setState({
-          ...this.state,
-          timer: setInterval(() => {
-            const options = [...this.props.options] || [];
-            const randomElement =
-              options[Math.floor(Math.random() * this.props.options.length)];
-            this.setState({
-              searchPlaceHolder: options.length
-                ? `Search ${randomElement.value}...`
-                : 'Searching ...',
-            });
-          }, 3000),
-        });
-      } else if (this.state.timer) {
-        clearInterval(this.state.timer);
+  const setRandomPlaceholderTimer = () => {
+    const timer = setInterval(() => {
+      const availableOptions = props.options ? [...props.options] : [];
+      const randomElement =
+        availableOptions[Math.floor(Math.random() * availableOptions.length)];
+      setSearchPlaceholder(
+        availableOptions.length
+          ? `Type ${randomElement.value} & Press Enter to Search...`
+          : 'Type Something & Press Enter to Search...'
+      );
+    }, 5000);
+
+    return () => clearInterval(timer);
+  };
+
+  const handleAutoComplete = (value) => {
+    setOptions(!value ? [] : props.options);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearchChange(e.target.value);
+    }
+  };
+
+  useEffect(() => {
+    const cleanup = setRandomPlaceholderTimer();
+
+    const handleSlashKey = (e) => {
+      if (e.key === '/' && document.activeElement !== autoCompleteRef.current) {
+        e.preventDefault();
+        autoCompleteRef.current.focus();
       }
     };
 
-    this.handleAutoComplete = (value) => {
-      this.setState({
-        ...this.state,
-        options: !value ? [] : this.props.options,
-      });
+    document.addEventListener('keydown', handleSlashKey);
+
+    return () => {
+      cleanup();
+      document.removeEventListener('keydown', handleSlashKey);
+      if (handleSearchChange.cancel) {
+        handleSearchChange.cancel();
+      }
     };
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  componentDidMount() {
-    this.setRandomPlaceHolderTimer(false);
-    this.setRandomPlaceHolderTimer(true);
-  }
-
-  componentWillUnmount() {
-    if (this.handleSearchChange.cancel) {
-      this.handleSearchChange.cancel();
-    }
-    this.setRandomPlaceHolderTimer(false);
-  }
-  render() {
-    const { searchPlaceHolder, options } = this.state;
-    return (
-      <div className='container'>
-        <div className='row justify-content-center'>
-          <div className='col-6'>
-            <div className='row g-2 mb-4'>
-              <div className='col-9'>
-                <AutoComplete
-                  placeholder={searchPlaceHolder}
-                  options={options}
-                  filterOption={(inputValue, option) =>
-                    option.value
-                      .toUpperCase()
-                      .indexOf(inputValue.toUpperCase()) !== -1
-                  }
-                  onSearch={this.handleAutoComplete}
+  return (
+    <div className='container'>
+      <div className='row justify-content-center'>
+        <div className='col-12'>
+          <div className='row g-3 mb-4 align-items-center'>
+            <div className='col-lg-4 col-md-6'>
+              <AutoComplete
+                ref={autoCompleteRef}
+                placeholder={searchPlaceholder}
+                options={options}
+                filterOption={(inputValue, option) =>
+                  option.value
+                    .toUpperCase()
+                    .indexOf(inputValue.toUpperCase()) !== -1
+                }
+                onSearch={handleAutoComplete}
+                size='large'
+                className='w-100'
+                variant='filled'
+                status={props.loading ? 'error' : ''}
+                disabled={props.loading}
+                onKeyDown={handleKeyDown}
+                onClear={() => {
+                  handleSearchChange('');
+                  autoCompleteRef.current.focus();
+                }}
+                backfill
+                allowClear
+              />
+            </div>
+            <div className='col-lg-5 col-md-6'>
+              <Space size='small'>
+                <Radio.Group
+                  value={upcomingRetirement}
+                  onChange={(e) => {
+                    setUpcomingRetirement(e.target.value);
+                  }}
                   size='large'
-                  className='w-100'
-                  onChange={this.handleSearchChange}
-                  variant='filled'
-                  status={this.props.loading ? 'error' : ''}
-                  disabled={this.props.loading}
-                />
-              </div>
-              <div className='col-3'>
-                <EmployeeTypesDropdown
-                  onChange={(value) => this.props.setFilterByType(value)}
-                  employeeType={this.props.employeeType}
-                  className='w-100'
-                  loading={this.props.loading}
-                />
-              </div>
+                >
+                  <Radio.Button value={false}>All</Radio.Button>
+                  <Radio.Button value={true}>Retiring in 6 Months</Radio.Button>
+                </Radio.Group>
+              </Space>
+            </div>
+            <div className='col-lg-3 col-md-12'>
+              <EmployeeTypesDropdown
+                onChange={(value) => props.setFilterByType(value)}
+                employeeType={props.employeeType}
+                className='w-100'
+                loading={props.loading}
+              />
             </div>
           </div>
         </div>
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
+
+export default EmployeeSearch;

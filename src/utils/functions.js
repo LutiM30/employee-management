@@ -1,6 +1,7 @@
 /* eslint-disable consistent-return */
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable import/extensions */
+import dayjs from 'dayjs';
 import {
   typesOfDepartments,
   typesOfDesignations,
@@ -46,6 +47,20 @@ export const GET_EMPLOYEE_VALUE = (employee, dataKey) => {
   }
 };
 
+export const AGE_CALCULATOR = (birthDate) => {
+  if (!birthDate) return null;
+  const today = dayjs();
+  const birthDayjs = dayjs(birthDate);
+  let age = today.year() - birthDayjs.year();
+  const monthDiff = today.month() - birthDayjs.month();
+
+  if (monthDiff < 0 || (monthDiff === 0 && today.date() < birthDayjs.date())) {
+    age--;
+  }
+
+  return age;
+};
+
 export const GET_RETIREMENT_COUNTDOWN = (joined, age) => {
   const today = new Date();
 
@@ -73,6 +88,11 @@ export const GET_RETIREMENT_COUNTDOWN = (joined, age) => {
   }${years ? `${years} Years ` : ''}untill retirement`;
 
   return {
+    diffDays,
+    years,
+    months,
+    days,
+    retirementDate,
     retirementDateText,
     retirementCountdownText,
   };

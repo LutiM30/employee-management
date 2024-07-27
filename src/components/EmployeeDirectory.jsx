@@ -11,6 +11,7 @@ const initialState = {
   employeeType: '',
   loading: true,
   error: null,
+  upcomingRetirement: false,
 };
 
 export default class EmployeeDirectory extends React.Component {
@@ -25,7 +26,7 @@ export default class EmployeeDirectory extends React.Component {
   };
 
   fetchFilteredEmployees = async () => {
-    const { searchQuery, employeeType } = this.state;
+    const { searchQuery, employeeType, upcomingRetirement } = this.state;
     this.setState({ loading: true, error: null });
 
     const query = `
@@ -40,6 +41,14 @@ export default class EmployeeDirectory extends React.Component {
           department
           type
           status
+          diffDays
+          years
+          months
+          days
+          retirementDate
+          retirementDateText
+          retirementCountdownText
+          birthDate
         }
       }
     `;
@@ -48,6 +57,7 @@ export default class EmployeeDirectory extends React.Component {
       filters: {
         searchQuery,
         type: employeeType,
+        upcomingRetirement,
       },
     };
 
@@ -74,16 +84,16 @@ export default class EmployeeDirectory extends React.Component {
       const employees = [...result.data.getFilteredEmployees];
 
       employees.forEach((employee) =>
-        keys.forEach((key) =>
-          autoCompleteOptions.push({ value: employee[key] })
-        )
+        keys.forEach((key) => autoCompleteOptions.push(employee[key]))
       );
 
       this.setState({
         employees,
         loading: false,
         // loading: true,
-        autoCompleteOptions,
+        autoCompleteOptions: [...new Set(autoCompleteOptions)].map((opt) => ({
+          value: opt,
+        })),
       });
     } catch (error) {
       console.error('Error fetching filtered employees:', error);
@@ -100,7 +110,14 @@ export default class EmployeeDirectory extends React.Component {
   }
 
   render() {
-    const { employees, searchQuery, employeeType, loading, error } = this.state;
+    const {
+      employees,
+      searchQuery,
+      employeeType,
+      loading,
+      error,
+      upcomingRetirement,
+    } = this.state;
 
     return (
       <div className='container-fluid py-4'>
@@ -114,6 +131,13 @@ export default class EmployeeDirectory extends React.Component {
               employeeType={employeeType}
               options={this.state.autoCompleteOptions}
               loading={this.state.loading}
+              upcomingRetirement={upcomingRetirement}
+              setUpcomingRetirement={(val) =>
+                this.setState(
+                  { ...this.state, upcomingRetirement: val },
+                  this.fetchFilteredEmployees
+                )
+              }
             />
             {loading ? (
               <div className='text-center mt-5'>

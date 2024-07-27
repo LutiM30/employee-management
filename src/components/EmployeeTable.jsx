@@ -15,6 +15,7 @@ class EmployeeTable extends React.Component {
                 <th scope='col'>#</th>
                 <th scope='col'>Name</th>
                 <th scope='col'>Age</th>
+                <th scope='col'>Birthdate</th>
                 <th scope='col'>Date of Joining</th>
                 <th scope='col'>Designation</th>
                 <th scope='col'>Department</th>
@@ -31,7 +32,7 @@ class EmployeeTable extends React.Component {
                   employee={employee}
                   refresh={this.props.getData}
                   history={this.props.history}
-                  even={!index % 2}
+                  even={(index + 1) % 2}
                 />
               ))}
             </tbody>
@@ -42,7 +43,7 @@ class EmployeeTable extends React.Component {
       return (
         <div className='alert alert-info' role='alert'>
           <i className='bi bi-info-circle me-2'></i>
-          There's no data available at the moment.
+          {"There's no data available at the moment."}
         </div>
       );
     }

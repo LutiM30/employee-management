@@ -7,12 +7,11 @@ import {
   typesOfStatus,
 } from '../utils/constants';
 import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
-import {
-  FORMAT_VALUE,
-  GET_EMPLOYEE_VALUE,
-  GET_RETIREMENT_COUNTDOWN,
-} from '../utils/functions';
-import { Button, Dropdown, Select, Tag, Tooltip } from 'antd';
+import { FORMAT_VALUE, GET_EMPLOYEE_VALUE } from '../utils/functions';
+import { Tag, Tooltip } from 'antd';
+import TableRowSelect from './UI/TableRowSelect.jsx';
+import TableRowActionBtns from './UI/TableRowActionBtns.jsx';
+import dayjs from 'dayjs';
 
 class TableRow extends React.Component {
   constructor(props) {
@@ -39,7 +38,8 @@ class TableRow extends React.Component {
         const result = await response.json();
 
         if (result.errors) {
-          console.error('GraphQL error:', result.errors);
+          console.error('GraphQL error:', result.errors[0]?.message);
+          alert(`Error deleting employee: ${result.errors[0]?.message}`);
         } else {
           alert(`${employeeName} deleted successfully!`);
           this.props.refresh();
@@ -64,7 +64,6 @@ class TableRow extends React.Component {
     const { editValue } = this.state;
     const { emp_id, designation, department, status } = editValue;
     const submittingValue = { emp_id, designation, department, status };
-
     const mutation = `mutation {
       updateEmployee(employee: {
         ${Object.entries(submittingValue)
@@ -93,7 +92,7 @@ class TableRow extends React.Component {
       const data = await response.json();
 
       if (data.errors) {
-        console.error('GraphQL error:', data.errors);
+        console.error('GraphQL error: ', data.errors?.messages);
       } else {
         alert(
           `${editValue.firstName} ${editValue.lastName} updated successfully!`
@@ -102,7 +101,8 @@ class TableRow extends React.Component {
       }
       this.setState({ isEditing: false });
     } catch (error) {
-      console.error('Error updating employee:', error);
+      console.error('Error updating employee: ', error);
+      alert('Error updating employee: ', error);
     }
   };
 
@@ -114,50 +114,7 @@ class TableRow extends React.Component {
     const { employee, index } = this.props;
     const { isEditing, editValue } = this.state;
     const employeeName = `${employee.firstName} ${employee.lastName}`;
-    const customDropdownEvent = (name, value) =>
-      this.handleChange({
-        target: { name, value },
-      });
-    const getFilteredOptions = (NAME, OPTIONS) =>
-      OPTIONS.filter((o) => editValue[NAME] !== o.value);
-
-    const labelRender = (props) => {
-      const { label, value, propName } = props;
-      if (label) {
-        return value;
-      }
-      const className = '';
-
-      return (
-        <>
-          {propName === 'status' ? (
-            <Tag
-              icon={
-                GET_EMPLOYEE_VALUE(editValue, 'status') === 'Working' ? (
-                  <CheckCircleOutlined />
-                ) : (
-                  <CloseCircleOutlined />
-                )
-              }
-              color={
-                GET_EMPLOYEE_VALUE(editValue, 'status') === 'Working'
-                  ? 'success'
-                  : 'error'
-              }
-            >
-              {GET_EMPLOYEE_VALUE(editValue, propName)}
-            </Tag>
-          ) : (
-            <span className={className}>
-              {GET_EMPLOYEE_VALUE(editValue, propName)}
-            </span>
-          )}
-        </>
-      );
-    };
-    const { retirementDateText, retirementCountdownText } =
-      GET_RETIREMENT_COUNTDOWN(employee.joined, Number(employee.age));
-
+    const { retirementDateText, retirementCountdownText } = employee;
     return (
       <tr>
         <th scope='row'>{index}</th>
@@ -177,6 +134,15 @@ class TableRow extends React.Component {
         </td>
         <td>
           <Tooltip
+            placement={this.props.even ? 'topRight' : 'bottomRight'}
+            title={retirementDateText}
+            color='cyan'
+          >
+            {dayjs(employee.birthDate).format('MMM D, YYYY')}
+          </Tooltip>
+        </td>
+        <td>
+          <Tooltip
             placement={this.props.even ? 'topLeft' : 'bottomLeft'}
             title={retirementCountdownText}
             color='cyan'
@@ -188,43 +154,26 @@ class TableRow extends React.Component {
           <span className={isEditing ? 'd-none' : ''}>
             {GET_EMPLOYEE_VALUE(employee, 'designation')}
           </span>
-          <Select
-            className={`${isEditing ? '' : 'd-none'}`}
-            showSearch
-            placeholder={'Select a Designation'}
-            optionFilterProp='label'
+          <TableRowSelect
+            editValue={editValue}
+            handleChange={this.handleChange}
+            isEditing={isEditing}
             name='designation'
-            onChange={(value) => customDropdownEvent('designation', value)}
-            options={getFilteredOptions('designation', typesOfDesignations)}
-            value={editValue.designation}
-            required
-            size='small'
-            variant='outlined'
-            labelRender={(props) =>
-              labelRender({ ...props, propName: 'designation' })
-            }
+            options={typesOfDesignations}
+            placeholder={'Select a Designation'}
           />
         </td>
         <td className='position-relative'>
           <span className={isEditing ? 'd-none' : ''}>
             {GET_EMPLOYEE_VALUE(employee, 'department')}
           </span>
-          <Select
-            className={`${isEditing ? '' : 'd-none'}`}
-            showSearch
-            placeholder={'Select a Department'}
-            optionFilterProp='label'
+          <TableRowSelect
+            editValue={editValue}
+            handleChange={this.handleChange}
+            isEditing={isEditing}
             name='department'
-            onChange={(value) => customDropdownEvent('department', value)}
-            options={getFilteredOptions('department', typesOfDepartments)}
-            value={editValue.department}
-            required
-            popupMatchSelectWidth={false}
-            size='small'
-            variant='outlined'
-            labelRender={(props) =>
-              labelRender({ ...props, propName: 'department' })
-            }
+            options={typesOfDepartments}
+            placeholder={'Select a Department'}
           />
         </td>
         <td>{GET_EMPLOYEE_VALUE(employee, 'type')}</td>
@@ -246,41 +195,26 @@ class TableRow extends React.Component {
           >
             {GET_EMPLOYEE_VALUE(employee, 'status')}
           </Tag>
-          <Select
-            className={`${isEditing ? '' : 'd-none'}`}
-            placeholder={'Select a Status'}
-            optionFilterProp='label'
+          <TableRowSelect
+            editValue={editValue}
+            handleChange={this.handleChange}
+            isEditing={isEditing}
             name='status'
-            onChange={(value) => customDropdownEvent('status', value)}
-            options={getFilteredOptions('status', typesOfStatus)}
-            value={editValue.status}
-            required
-            size='middle'
-            variant='outlined'
-            labelRender={(props) =>
-              labelRender({ ...props, propName: 'status' })
-            }
+            options={typesOfStatus}
+            placeholder={'Select a Status'}
           />
         </td>
-        <td>
-          <button
-            className={`btn btn-outline-${
-              !isEditing ? 'primary' : 'success'
-            } btn-sm me-2`}
-            onClick={!isEditing ? this.toggleEditing : this.handleSubmit}
-          >
-            <i
-              className={`bi bi-${!isEditing ? 'pencil-square' : 'check-lg'}`}
-            ></i>{' '}
-            {!isEditing ? 'Edit' : 'Save'}
-          </button>
-          <button
-            className='btn btn-outline-danger btn-sm'
-            onClick={() => this.deleteEmployee(employee.emp_id, employeeName)}
-          >
-            <i className='bi bi-trash'></i> Delete
-          </button>
-        </td>
+        <TableRowActionBtns
+          emp_id={employee?.emp_id || ''}
+          employeeName={employeeName}
+          isEditing={isEditing}
+          setParentState={(update) =>
+            this.setState({ ...this.state, ...update })
+          }
+          parentState={this.state}
+          refresh={this.props.refresh}
+          employeeStatus={employee.status}
+        />
       </tr>
     );
   }

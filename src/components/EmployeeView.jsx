@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
 import React from 'react';
 import {
   API_ENDPOINT,
@@ -160,6 +161,7 @@ class EmployeeView extends React.Component {
               </div>
             </div>
           </div>
+          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
           <div
             className='card-footer d-flex justify-content-between align-items-center'
             onMouseEnter={this.showCopyTextHandler}
