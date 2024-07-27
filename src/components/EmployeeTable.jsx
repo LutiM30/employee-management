@@ -31,6 +31,7 @@ class EmployeeTable extends React.Component {
                   employee={employee}
                   refresh={this.props.getData}
                   history={this.props.history}
+                  even={!index % 2}
                 />
               ))}
             </tbody>

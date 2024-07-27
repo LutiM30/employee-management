@@ -3,12 +3,13 @@ import React from 'react';
 import { API_ENDPOINT } from '../utils/constants.js';
 import EmployeeSearch from './EmployeeSearch.jsx';
 import EmployeeTable from './EmployeeTable.jsx';
+import { LoadingOutlined } from '@ant-design/icons';
 
 const initialState = {
   employees: [],
   searchQuery: '',
   employeeType: '',
-  loading: false,
+  loading: true,
   error: null,
 };
 
@@ -62,14 +63,35 @@ export default class EmployeeDirectory extends React.Component {
       if (result.errors) {
         throw new Error(result.errors[0].message);
       }
+      const keys = [
+        'department',
+        'designation',
+        'firstName',
+        'lastName',
+        'type',
+      ];
+      const autoCompleteOptions = [];
+      const employees = [...result.data.getFilteredEmployees];
+
+      employees.forEach((employee) =>
+        keys.forEach((key) =>
+          autoCompleteOptions.push({ value: employee[key] })
+        )
+      );
 
       this.setState({
-        employees: result.data.getFilteredEmployees,
+        employees,
         loading: false,
+        // loading: true,
+        autoCompleteOptions,
       });
     } catch (error) {
       console.error('Error fetching filtered employees:', error);
-      this.setState({ error: error.message, loading: false });
+      this.setState({
+        error: error.message,
+        loading: false,
+        // loading: true,
+      });
     }
   };
 
@@ -90,12 +112,15 @@ export default class EmployeeDirectory extends React.Component {
               setFilterByType={this.setFilterByType}
               searchQuery={searchQuery}
               employeeType={employeeType}
+              options={this.state.autoCompleteOptions}
+              loading={this.state.loading}
             />
             {loading ? (
               <div className='text-center mt-5'>
-                <div className='spinner-border text-primary' role='status'>
-                  <span className='visually-hidden'>Loading...</span>
-                </div>
+                <LoadingOutlined
+                  spin
+                  style={{ fontSize: '35px', color: '#0d6efd' }}
+                />
               </div>
             ) : error ? (
               <p>Error: {error}</p>

@@ -46,6 +46,38 @@ export const GET_EMPLOYEE_VALUE = (employee, dataKey) => {
   }
 };
 
+export const GET_RETIREMENT_COUNTDOWN = (joined, age) => {
+  const today = new Date();
+
+  const joinedDate = new Date(joined.split('T')[0]);
+  const yearsUntilRetirement = 65 - age;
+
+  const retirement = joinedDate;
+  retirement.setFullYear(retirement.getFullYear() + yearsUntilRetirement);
+
+  const diffTime = retirement.getTime() - today.getTime();
+
+  // 1000 (milliseconds in a second) * 60 (seconds in a minute) * 60 (minutes in an hour) * 24 (hours in a day).
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  const years = Math.floor(diffDays / 365);
+  const months = Math.floor((diffDays % 365) / 30);
+  const days = diffDays % 30;
+
+  const retirementDate = retirement.toISOString().split('T')[0];
+
+  const retirementDateText = `Retirement Date: ${new Date(
+    retirementDate
+  )?.toDateString()}`;
+  const retirementCountdownText = `${days ? `${days} Days, ` : ''}${
+    months ? `${months} Months, ` : ''
+  }${years ? `${years} Years ` : ''}untill retirement`;
+
+  return {
+    retirementDateText,
+    retirementCountdownText,
+  };
+};
+
 export const FORMAT_VALUE = (value) => {
   if (typeof value === 'string') {
     return `"${value}"`.trim();
