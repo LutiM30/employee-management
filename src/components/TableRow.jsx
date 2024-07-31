@@ -8,10 +8,11 @@ import {
 } from '../utils/constants';
 import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { FORMAT_VALUE, GET_EMPLOYEE_VALUE } from '../utils/functions';
-import { Tag, Tooltip } from 'antd';
+import { Avatar, Tag, Tooltip } from 'antd';
 import TableRowSelect from './UI/TableRowSelect.jsx';
 import TableRowActionBtns from './UI/TableRowActionBtns.jsx';
 import dayjs from 'dayjs';
+import { UserOutlined } from '@ant-design/icons';
 
 class TableRow extends React.Component {
   constructor(props) {
@@ -120,7 +121,16 @@ class TableRow extends React.Component {
       <tr>
         <th scope='row'>{index}</th>
         <td>
-          <Link to={`/employees/${employee.emp_id}`} className='text-primary'>
+          <Link
+            to={`/employees/${employee.emp_id}`}
+            className='text-primary d-flex align-items-center'
+          >
+            <Avatar
+              size={25}
+              icon={<UserOutlined />}
+              src={employee.avatar}
+              className='mr-3'
+            />
             {employeeName}
           </Link>
         </td>

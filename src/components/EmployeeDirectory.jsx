@@ -1,6 +1,6 @@
 // EmployeeDirectory.jsx
 import React from 'react';
-import { API_ENDPOINT } from '../utils/constants.js';
+import { API_ENDPOINT, AVATAR_URL } from '../utils/constants.js';
 import EmployeeSearch from './EmployeeSearch.jsx';
 import EmployeeTable from './EmployeeTable.jsx';
 import { LoadingOutlined } from '@ant-design/icons';
@@ -81,7 +81,17 @@ export default class EmployeeDirectory extends React.Component {
         'type',
       ];
       const autoCompleteOptions = [];
-      const employees = [...result.data.getFilteredEmployees];
+      const avatarAddFunc = (employee) => {
+        const employeeName = (
+          employee.firstName + employee.lastName
+        ).toLowerCase();
+        employee.avatar = AVATAR_URL + employeeName;
+        return employee;
+      };
+
+      const employees = [...result.data.getFilteredEmployees].map(
+        avatarAddFunc
+      );
 
       employees.forEach((employee) =>
         keys.forEach((key) => autoCompleteOptions.push(employee[key]))
