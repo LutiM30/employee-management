@@ -130,7 +130,6 @@ export default class EmployeeDirectory extends React.Component {
               searchQuery={searchQuery}
               employeeType={employeeType}
               options={this.state.autoCompleteOptions}
-              loading={this.state.loading}
               upcomingRetirement={upcomingRetirement}
               setUpcomingRetirement={(val) =>
                 this.setState(
@@ -149,10 +148,12 @@ export default class EmployeeDirectory extends React.Component {
             ) : error ? (
               <p>Error: {error}</p>
             ) : (
-              <EmployeeTable
-                listOfEmployees={employees}
-                getData={this.fetchFilteredEmployees}
-              />
+              <>
+                <EmployeeTable
+                  listOfEmployees={employees}
+                  getData={this.fetchFilteredEmployees}
+                />
+              </>
             )}
           </div>
         </div>

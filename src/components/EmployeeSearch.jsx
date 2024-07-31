@@ -14,9 +14,11 @@ const EmployeeSearch = (props) => {
 
   const setRandomPlaceholderTimer = () => {
     const timer = setInterval(() => {
-      const availableOptions = props.options ? [...props.options] : [];
+      const availableOptions = props.options || [];
+
       const randomElement =
         availableOptions[Math.floor(Math.random() * availableOptions.length)];
+
       setSearchPlaceholder(
         availableOptions.length
           ? `Type ${randomElement.value} & Press Enter to Search...`
@@ -58,7 +60,7 @@ const EmployeeSearch = (props) => {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [props.options, props.loading]);
 
   return (
     <div className='container'>
@@ -88,6 +90,7 @@ const EmployeeSearch = (props) => {
                 }}
                 backfill
                 allowClear
+                loading={props.loading}
               />
             </div>
             <div className='col-lg-5 col-md-6'>

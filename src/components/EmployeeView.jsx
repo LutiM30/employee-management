@@ -1,7 +1,20 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 import React from 'react';
 import {
+  Card,
+  Avatar,
+  Descriptions,
+  Tag,
+  Tooltip,
+  message,
+  Button,
+} from 'antd';
+import { UserOutlined, CopyOutlined, HomeOutlined } from '@ant-design/icons';
+import { Link } from 'react-router-dom';
+import dayjs from 'dayjs';
+
+import {
   API_ENDPOINT,
+  AVATAR_URL,
   typesOfDepartments,
   typesOfDesignations,
   typesOfEmployees,
@@ -9,31 +22,23 @@ import {
 } from '../utils/constants';
 
 class EmployeeView extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      employee: null,
-      loading: true,
-      error: null,
-      showCopyText: false,
-      copyText: 'Click to copy Employee ID',
-    };
+  state = {
+    employee: null,
+    loading: true,
+    error: null,
+  };
+
+  componentDidMount() {
+    this.fetchEmployeeData();
   }
 
-  getData = async () => {
+  fetchEmployeeData = async () => {
     const { emp_id } = this.props.match.params;
-
     const query = `query {
       getEmployee(emp_id: "${emp_id}") {
-        emp_id  
-        firstName
-        lastName
-        age
-        joined
-        designation
-        department
-        type
-        status
+        emp_id firstName lastName age joined designation department
+        type status birthDate diffDays years months days
+        retirementDate retirementDateText retirementCountdownText
       }
     }`;
 
@@ -49,8 +54,15 @@ class EmployeeView extends React.Component {
       if (result.errors) {
         throw new Error(result.errors[0].message);
       } else {
-        const { getEmployee } = result.data;
-        this.setState({ employee: getEmployee, loading: false });
+        const employee = { ...result.data.getEmployee };
+        const employeeName = (
+          result.data.getEmployee.firstName + result.data.getEmployee.lastName
+        ).toLowerCase();
+        employee.avatar = AVATAR_URL + employeeName;
+        this.setState({
+          employee,
+          loading: false,
+        });
       }
     } catch (error) {
       console.error('Error fetching employee data:', error);
@@ -58,48 +70,43 @@ class EmployeeView extends React.Component {
     }
   };
 
-  showCopyTextHandler = () => {
-    this.setState({
-      showCopyText: !this.state.showCopyText,
-      copyText: !this.state.showCopyText
-        ? 'Click to copy Employee ID'
-        : 'Copied!',
-    });
-  };
-
   copyEmployeeID = () => {
     const { employee } = this.state;
     navigator.clipboard.writeText(employee.emp_id);
-    this.setState({ copyText: 'Copied!' });
+    message.success('Employee ID copied to clipboard!');
   };
 
-  componentDidMount() {
-    this.getData();
-  }
-
   render() {
-    const { employee, loading, error, showCopyText, copyText } = this.state;
+    const { employee, loading, error } = this.state;
 
-    if (loading)
+    if (loading) {
       return (
-        <div className='text-center mt-5'>
+        <div
+          className='d-flex justify-content-center align-items-center'
+          style={{ height: '100vh' }}
+        >
           <div className='spinner-border text-primary' role='status'>
             <span className='visually-hidden'>Loading...</span>
           </div>
         </div>
       );
-    if (error)
+    }
+
+    if (error) {
       return (
         <div className='alert alert-danger m-3' role='alert'>
           Error: {error}
         </div>
       );
-    if (!employee?.firstName)
+    }
+
+    if (!employee?.firstName) {
       return (
         <div className='alert alert-warning m-3' role='alert'>
           Employee not found
         </div>
       );
+    }
 
     const EMPLOYEE_NAME = `${employee.firstName || ''} ${
       employee.lastName || ''
@@ -119,68 +126,72 @@ class EmployeeView extends React.Component {
 
     return (
       <div className='container mt-5'>
-        <div className='card shadow'>
-          <div className='card-header bg-primary text-white'>
-            <h1 className='mb-0'>{EMPLOYEE_NAME}</h1>
-          </div>
-          <div className='card-body'>
-            <div className='row'>
-              <div className='col-md-6'>
-                <ul className='list-group list-group-flush'>
-                  <li className='list-group-item'>
-                    <strong>Department:</strong> {EMPLOYEE_DEPARTMENT_TEXT}
-                  </li>
-                  <li className='list-group-item'>
-                    <strong>Designation:</strong> {EMPLOYEE_DESIGNATION_TEXT}
-                  </li>
-                  <li className='list-group-item'>
-                    <strong>Employee Type:</strong> {EMPLOYEE_TYPE_TEXT}
-                  </li>
-                </ul>
+        <Card
+          className='shadow-lg'
+          cover={
+            <div className='bg-primary text-white p-4'>
+              <div className='d-flex justify-content-between align-items-center mb-3'>
+                <div className='d-flex align-items-center'>
+                  <Avatar
+                    size={100}
+                    icon={<UserOutlined />}
+                    src={employee.avatar}
+                  />
+                  <h1 className='ms-4 mb-0'>{EMPLOYEE_NAME}</h1>
+                </div>
+                <Link to='/'>
+                  <Button type='default' icon={<HomeOutlined />} size='large'>
+                    Back to Home
+                  </Button>
+                </Link>
               </div>
-              <div className='col-md-6'>
-                <ul className='list-group list-group-flush'>
-                  <li className='list-group-item'>
-                    <strong>Age:</strong> {employee.age} years
-                  </li>
-                  <li className='list-group-item'>
-                    <strong>Joined:</strong>{' '}
-                    {new Date(employee.joined).toLocaleDateString()}
-                  </li>
-                  <li className='list-group-item'>
-                    <strong>Status:</strong>{' '}
-                    <span
-                      className={`badge ${
-                        employee.status === 1 ? 'bg-success' : 'bg-danger'
-                      }`}
-                    >
-                      {EMPLOYEE_STATUS_TEXT}
-                    </span>
-                  </li>
-                </ul>
-              </div>
+              <Tag
+                color={employee.status === 1 ? 'success' : 'error'}
+                className='px-3 py-1'
+              >
+                {EMPLOYEE_STATUS_TEXT}
+              </Tag>
             </div>
+          }
+        >
+          <Descriptions column={2} bordered>
+            <Descriptions.Item label='Department'>
+              {EMPLOYEE_DEPARTMENT_TEXT}
+            </Descriptions.Item>
+            <Descriptions.Item label='Designation'>
+              {EMPLOYEE_DESIGNATION_TEXT}
+            </Descriptions.Item>
+            <Descriptions.Item label='Employee Type'>
+              {EMPLOYEE_TYPE_TEXT}
+            </Descriptions.Item>
+            <Descriptions.Item label='Birthdate'>
+              {dayjs(employee.birthDate).format('MMM D, YYYY')} ({employee.age}{' '}
+              years)
+            </Descriptions.Item>
+            <Descriptions.Item label='Joined'>
+              {dayjs(employee.joined).format('MMM D, YYYY')}
+            </Descriptions.Item>
+            <Descriptions.Item label='Retirement'>
+              {dayjs(employee.retirementDate).format('MMM D, YYYY')} (
+              {employee.retirementCountdownText})
+            </Descriptions.Item>
+          </Descriptions>
+
+          <div className='mt-4 d-flex justify-content-between align-items-center'>
+            <span className='fw-bold'>Employee ID: {employee.emp_id}</span>
+            <Tooltip color={'geekblue'} title='Copy Employee ID'>
+              <Tag
+                icon={<CopyOutlined />}
+                color='blue'
+                className='px-3 py-2'
+                style={{ cursor: 'pointer' }}
+                onClick={this.copyEmployeeID}
+              >
+                Copy ID
+              </Tag>
+            </Tooltip>
           </div>
-          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
-          <div
-            className='card-footer d-flex justify-content-between align-items-center'
-            onMouseEnter={this.showCopyTextHandler}
-            onMouseLeave={this.showCopyTextHandler}
-            onClick={this.copyEmployeeID}
-            style={{ cursor: 'pointer' }}
-          >
-            <span>
-              <strong>Employee ID:</strong> {employee.emp_id}
-            </span>
-            <span
-              className={`badge bg-secondary ${
-                showCopyText ? 'opacity-100' : 'opacity-0'
-              } transition ${copyText === 'Copied!' ? 'bg-success' : ''}`}
-            >
-              {copyText}
-            </span>
-          </div>
-        </div>
+        </Card>
       </div>
     );
   }

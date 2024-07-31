@@ -115,6 +115,7 @@ class TableRow extends React.Component {
     const { isEditing, editValue } = this.state;
     const employeeName = `${employee.firstName} ${employee.lastName}`;
     const { retirementDateText, retirementCountdownText } = employee;
+
     return (
       <tr>
         <th scope='row'>{index}</th>
@@ -123,15 +124,7 @@ class TableRow extends React.Component {
             {employeeName}
           </Link>
         </td>
-        <td>
-          <Tooltip
-            placement={this.props.even ? 'topRight' : 'bottomRight'}
-            title={retirementDateText}
-            color='cyan'
-          >
-            {employee.age}
-          </Tooltip>
-        </td>
+        <td>{employee.age}</td>
         <td>
           <Tooltip
             placement={this.props.even ? 'topRight' : 'bottomRight'}

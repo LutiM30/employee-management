@@ -90,3 +90,5 @@ export const defaultEmployeeCreateState = {
   type: typesOfEmployees[0].value,
   errors: {},
 };
+
+export const AVATAR_URL = 'https://avatar.iran.liara.run/public/boy?username=';
