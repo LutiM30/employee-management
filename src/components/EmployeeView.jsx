@@ -137,7 +137,7 @@ class EmployeeView extends React.Component {
                     icon={<UserOutlined />}
                     src={employee.avatar}
                   />
-                  <h1 className='ms-4 mb-0'>{EMPLOYEE_NAME}</h1>
+                  <h1 className='ms-4 mb-0'>{EMPLOYEE_NAME} </h1>
                 </div>
                 <Link to='/'>
                   <Button type='default' icon={<HomeOutlined />} size='large'>

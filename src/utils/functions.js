@@ -107,18 +107,3 @@ export const FORMAT_VALUE = (value) => {
     return value;
   }
 };
-
-export const DEBOUNCE = (func, delay) => {
-  let timeoutId;
-
-  function debounced(...args) {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func.apply(this, args), delay);
-  }
-
-  debounced.cancel = function () {
-    clearTimeout(timeoutId);
-  };
-
-  return debounced;
-};

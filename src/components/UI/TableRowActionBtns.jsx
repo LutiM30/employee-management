@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FORMAT_VALUE } from '../../utils/functions';
 import { API_ENDPOINT } from '../../utils/constants';
-import { Button, Popconfirm, Tooltip } from 'antd';
+import { Button, message, Popconfirm, Tooltip } from 'antd';
 import {
   EditTwoTone,
   DeleteTwoTone,
@@ -68,7 +68,7 @@ const TableRowActionBtns = ({
       if (data.errors) {
         console.error('GraphQL error: ', data.errors?.messages);
       } else {
-        alert(
+        message.success(
           `${editValue.firstName} ${editValue.lastName} updated successfully!`
         );
         refresh();
@@ -76,7 +76,7 @@ const TableRowActionBtns = ({
       setParentState({ isEditing: false });
     } catch (error) {
       console.error('Error updating employee: ', error);
-      alert('Error updating employee: ', error);
+      message.error('Error updating employee: ', error);
     }
   };
 
@@ -96,9 +96,10 @@ const TableRowActionBtns = ({
 
       if (result.errors) {
         console.error('GraphQL error:', result.errors[0]?.message);
-        alert(`Error deleting employee: ${result.errors[0]?.message}`);
+
+        message.error(`Error deleting employee: ${result.errors[0]?.message}`);
       } else {
-        alert(`${employeeName} deleted successfully!`);
+        message.success(`${employeeName} deleted successfully!`);
         refresh();
       }
     } catch (error) {
